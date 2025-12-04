@@ -6,14 +6,14 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Menu {
-	
+
 	private Connection conexion;
 	private Scanner scanner = new Scanner(System.in);
-	
+
 	public void acceder() throws SQLException {
 		conexion = ConexionBd.conectar();
 		scanner = new Scanner(System.in);
-		System.out.print("Bienvenido a tienda \n" + "1. Registrarse \n" + "2. Inicio sesión \n" + "Escoge: ");
+		System.out.print("Bienvenido a Inkly \n" + "1. Registrarse \n" + "2. Inicio sesión \n" + "Escoge: ");
 		String eleccion = scanner.nextLine();
 
 		switch (eleccion) {
@@ -34,7 +34,7 @@ public class Menu {
 	}
 
 	private void inicio() {
-		System.out.print("Bienvenido a tienda \n" + "1.Ver carrito de compras \n" + "2.Ver pinturas \n"
+		System.out.print("Bienvenido a Inkly \n" + "1.Ver carrito de compras \n" + "2.Ver pinturas \n"
 				+ "3.Configuraciones \n" + "4.Salir \n" + "Elige: ");
 		String opcion = scanner.nextLine();
 
@@ -47,27 +47,27 @@ public class Menu {
 		case "3":
 			break;
 		case "4":
-			System.out.println("Adioooos");
+			System.out.println("Saliendo de Inkly...");
 			break;
 		default:
 			break;
 		}
 
 	}
-	
+
 	private void registroUsuario() throws SQLException {
-		
+
 		boolean edadCorrecta = false;
 		boolean numeroCorrecto = false;
+		boolean formatoCorrecto = true;
 		int edad = 0;
 		String telefono = "";
 		
-		try {
-			
-			System.out.print("Introduce tu nombre: ");
-			String nombre = scanner.nextLine();
-			
-			while (!edadCorrecta) {
+		System.out.print("Introduce tu nombre: ");
+		String nombre = scanner.nextLine();
+
+		do {
+			try {
 				System.out.print("Introduce tu edad: ");
 				edad = scanner.nextInt();
 				scanner.nextLine();
@@ -76,43 +76,45 @@ public class Menu {
 				} else {
 					System.err.println("La edad tiene que ser menor a 100 años");
 				}
+			} catch (InputMismatchException ime) {
+				System.err.println("Introduce una edad correcta");
+				formatoCorrecto = false;
+				scanner.nextLine();
 			}
-			
-			while (!numeroCorrecto) {
-				System.out.print("Introduce tu telefono: ");
-				telefono = scanner.nextLine();
-				if (telefono.length() == 9 && telefono.matches("^[0-9]+$")) {
-					numeroCorrecto = true;
-				} else {
-					System.err.println("Introduce un número correcto");
-				}
-			}
+		} while (!formatoCorrecto && !edadCorrecta);
 
-			System.out.print("Introduce tu DNI: ");
-			String dni = scanner.nextLine();
-
-			System.out.print("Introduce tu nacionalidad: ");
-			String nacionalidad = scanner.nextLine();
-
-			System.out.print("Introduce tu email: ");
-			String email = scanner.nextLine();
-
-			System.out.print("Introduce tu contraseña: ");
-			String pswd = scanner.nextLine();
-
-			if (Consultas.usuarioExiste(dni, conexion)) {
-				System.out.println("El usuario con DNI " + dni + " ya existe");
+		while (!numeroCorrecto) {
+			System.out.print("Introduce tu telefono: ");
+			telefono = scanner.nextLine();
+			if (telefono.length() == 9 && telefono.matches("^\\d+$")) {
+				numeroCorrecto = true;
 			} else {
-				Consultas.insertarUsuario(nombre, edad, telefono, dni, nacionalidad, email, pswd, conexion);
-				System.out.println("Usuario introducido correctamente");
+				System.err.println("Introduce un número de telefono correcto");
+				scanner.nextLine();
 			}
-			
-		} catch (InputMismatchException ime) {
-			System.err.println("Introduce un número correcto");
+		}
+
+		System.out.print("Introduce tu DNI: ");
+		String dni = scanner.nextLine();
+
+		System.out.print("Introduce tu nacionalidad: ");
+		String nacionalidad = scanner.nextLine();
+
+		System.out.print("Introduce tu email: ");
+		String email = scanner.nextLine();
+
+		System.out.print("Introduce tu contraseña: ");
+		String pswd = scanner.nextLine();
+
+		if (Consultas.usuarioExiste(dni, conexion)) {
+			System.out.println("El usuario con DNI " + dni + " ya existe");
+		} else {
+			Consultas.insertarUsuario(nombre, edad, telefono, dni, nacionalidad, email, pswd, conexion);
+			System.out.println("Usuario introducido correctamente");
 		}
 
 	}
-	
+
 	private void inicioSesion() {
 		System.out.println("Introduce tu email: ");
 		String email = scanner.nextLine();
@@ -127,5 +129,5 @@ public class Menu {
 		}
 
 	}
-	
+
 }

@@ -98,8 +98,9 @@ public class Consultas {
 			sentencia = conexion.prepareStatement(sentenciaSql);
 			ResultSet resultado = sentencia.executeQuery();
 			while (resultado.next()) {
-				System.out.println(resultado.getString(1) + " - " + resultado.getString(2) + " - "
-						+ resultado.getString(3) + " - " + resultado.getInt(4) + " - " + resultado.getString(5));
+				System.out.println("Descripcion: " + resultado.getString(1) + " | Estilo: " 
+						+ resultado.getString(2) + "\n Titulo: " + resultado.getString(3) 
+						+ " | Precio: " + resultado.getInt(4) + "\n Fecha de publicación: " + resultado.getString(5));
 			}
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
