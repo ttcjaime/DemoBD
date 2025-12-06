@@ -1,9 +1,11 @@
 package acceso;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class Consultas {
 
@@ -63,10 +65,11 @@ public class Consultas {
 		return false;
 	}
 
-	public static void insertarUsuario(String nombre, int edad, String telefono, String dni,
-			String nacionalidad, String email, String pswd, Connection conexion) throws SQLException {
+	// añadi rol
+	public static void insertarUsuario(String nombre, int edad, String telefono, String dni, String nacionalidad,
+			String email, String pswd, String rol, Connection conexion) throws SQLException {
 		String sentenciaSQL = "INSERT INTO usuarios (nombre, edad, telefono,"
-				+ " dni, nacionalidad, email, passwor) VALUES (?, ?, ?, ?, ?, ?, ?)";
+				+ " dni, nacionalidad, email, passwor, rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement sentencia = null;
 		try {
 			sentencia = conexion.prepareStatement(sentenciaSQL);
@@ -77,6 +80,7 @@ public class Consultas {
 			sentencia.setString(5, nacionalidad);
 			sentencia.setString(6, email);
 			sentencia.setString(7, pswd);
+			sentencia.setString(8, rol);
 			sentencia.executeUpdate();
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
@@ -98,9 +102,9 @@ public class Consultas {
 			sentencia = conexion.prepareStatement(sentenciaSql);
 			ResultSet resultado = sentencia.executeQuery();
 			while (resultado.next()) {
-				System.out.println("Descripcion: " + resultado.getString(1) + " | Estilo: " 
-						+ resultado.getString(2) + "\n Titulo: " + resultado.getString(3) 
-						+ " | Precio: " + resultado.getInt(4) + "\n Fecha de publicación: " + resultado.getString(5));
+				System.out.println("Descripcion: " + resultado.getString(1) + " | Estilo: " + resultado.getString(2)
+						+ "\n Titulo: " + resultado.getString(3) + " | Precio: " + resultado.getInt(4)
+						+ "\n Fecha de publicación: " + resultado.getString(5));
 			}
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
@@ -112,5 +116,83 @@ public class Consultas {
 			}
 		}
 	}
+
+	// añadido por mi
+	public static void subirPintura(String titulo, String descripcion, String estilo, double precio, int id,
+			LocalDate fecha, Connection conexion) {
+		String sentenciaSQL = "INSERT INTO dibujos (titulo, descripcion, estilo,"
+				+ " precio, id_dibujos, fecha_publicacion) VALUES (?, ?, ?, ?, ?, ?)";
+		PreparedStatement sentencia = null;
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSQL);
+			sentencia.setString(1, titulo);
+			sentencia.setString(2, descripcion);
+			sentencia.setString(3, estilo);
+			sentencia.setDouble(4, precio);
+			sentencia.setInt(5, id);
+			sentencia.setDate(6, java.sql.Date.valueOf(fecha));
+			sentencia.executeUpdate();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			if (sentencia != null) {
+				try {
+					sentencia.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public static void insertarArtista(String dni, String biografia, String estilo, boolean verificado, int seguidores,
+			Connection conexion) throws SQLException {
+		String sentenciaSQL = "INSERT INTO artista (dni, biografia, estilo, verificado, seguidores) VALUES (?, ?, ?, ?, ?)";
+		PreparedStatement sentencia = null;
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSQL);
+			sentencia.setString(1, dni);
+			sentencia.setString(2, biografia);
+			sentencia.setString(3, estilo);
+			sentencia.setBoolean(4, verificado);
+			sentencia.setInt(5, seguidores);
+			sentencia.executeUpdate();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			if (sentencia != null) {
+				try {
+					sentencia.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public static void insertarCliente(String direccion, String dni, Connection conexion) throws SQLException {
+		String sentenciaSQL = "INSERT INTO cliente (direccion, dni) VALUES (?, ?)";
+		PreparedStatement sentencia = null;
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSQL);
+			sentencia.setString(1, direccion);
+			sentencia.setString(2, dni);
+			sentencia.executeUpdate();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			if (sentencia != null) {
+				try {
+					sentencia.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 	
+	public static void comprarPintura() {
+		
+	}
+
 }
