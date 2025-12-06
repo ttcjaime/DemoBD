@@ -41,10 +41,11 @@ public class Menu {
 
 		// añadido el do while y lo cambie a int ya que asi el bucle do while no da
 		// problemas
+		// he quitado lo de configuraciones
 		int opcion;
 		do {
 			System.out.print("Bienvenido a Inkly \n" + "1.Ver carrito de compras \n" + "2.Ver pinturas \n"
-					+ "3.Configuraciones \n" + "4.Subir dibujo \n" + "5.Salir \n" + "Elige: ");
+					+ "3.Comprar dibujo \n" + "4.Subir dibujo \n" + "5.Salir \n" + "Elige: ");
 			opcion = scanner.nextInt();
 			scanner.nextLine();
 
@@ -55,6 +56,30 @@ public class Menu {
 				Consultas.verPinturas(conexion);
 				break;
 			case 3:
+				System.out.println("Introduce el nombre de la obra que desea comprar: ");
+				String dibujo = scanner.nextLine();
+				
+				int idDibujo = (int) Consultas.obtenerIdDibujo(dibujo, conexion);
+				if (idDibujo == -1) {
+					System.out.println("No se encontró la obra.");
+					break;
+				}
+				double precioPorId = Consultas.obtenerPrecioDibujo(idDibujo, conexion);
+				
+				System.out.println("Introduce de nuevo tu DNI: ");
+				String dni = scanner.nextLine();
+				
+				int idMetodo = 1; // ya que solo es un metodo de pago
+				Consultas.insertarMetodoPago(idMetodo, "Visa 1234", "Visa", "Tarjeta", conexion);
+				
+				int idPedido = Consultas.crearPedido(conexion, dni, precioPorId, idMetodo);
+				if (idPedido == -1) {
+					System.out.println("Error al crear el pedido.");
+					break;
+				}
+
+				Consultas.comprarPintura(idPedido, idDibujo, precioPorId, conexion);
+				System.out.println("Compra realizada correctamente. ID de pedido: " + idPedido);
 				break;
 			case 4:
 				if (rol.equals("artista")) {

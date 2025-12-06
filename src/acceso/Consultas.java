@@ -118,6 +118,91 @@ public class Consultas {
 	}
 
 	// añadido por mi
+
+	public static int obtenerIdDibujo(String titulo, Connection conexion) {
+		String sentenciaSql = "SELECT id_dibujos FROM dibujos WHERE titulo = ?";
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSql);
+			sentencia.setString(1, titulo);
+			resultado = sentencia.executeQuery();
+
+			while (resultado.next()) {
+				return resultado.getInt("id_dibujos");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (resultado != null)
+					resultado.close();
+				if (sentencia != null)
+					sentencia.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return -1;
+
+	}
+
+	public static double obtenerPrecioDibujo(int idDibujo, Connection conexion) {
+		String sentenciaSql = "SELECT precio FROM dibujos WHERE id_dibujos = ?";
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSql);
+			sentencia.setInt(1, idDibujo);
+			resultado = sentencia.executeQuery();
+
+			if (resultado.next()) {
+				return resultado.getDouble("precio");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (resultado != null)
+					resultado.close();
+				if (sentencia != null)
+					sentencia.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return -1;
+	}
+
+	public static void insertarMetodoPago(int idMetodo, String detalles, String proveedor, String tipo,
+			Connection conexion) {
+		String sentenciaSQL = "INSERT INTO metodopago (id_metodo, detalles, proveedor, tipo) VALUES (?, ?, ?, ?)";
+		PreparedStatement sentencia = null;
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSQL);
+			sentencia.setInt(1, idMetodo);
+			sentencia.setString(2, detalles);
+			sentencia.setString(3, proveedor);
+			sentencia.setString(4, tipo);
+			sentencia.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (sentencia != null) {
+				try {
+					sentencia.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	public static void subirPintura(String titulo, String descripcion, String estilo, double precio, int id,
 			LocalDate fecha, Connection conexion) {
 		String sentenciaSQL = "INSERT INTO dibujos (titulo, descripcion, estilo,"
@@ -130,7 +215,7 @@ public class Consultas {
 			sentencia.setString(3, estilo);
 			sentencia.setDouble(4, precio);
 			sentencia.setInt(5, id);
-			sentencia.setDate(6, java.sql.Date.valueOf(fecha));
+			sentencia.setString(6, String.valueOf(fecha));
 			sentencia.executeUpdate();
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
@@ -190,9 +275,43 @@ public class Consultas {
 			}
 		}
 	}
-	
-	public static void comprarPintura() {
-		
+
+	public static int crearPedido(Connection conexion, String dniCliente, double total, int idMetodo) {
+		int idPedido = (int) (Math.random() * 1000) + 1;
+		String sentenciaSQL = "INSERT INTO pedido (id_pedido, total, dni_cliente, id_metodo) VALUES (?, ?, ?, ?)";
+		try (PreparedStatement sentencia = conexion.prepareStatement(sentenciaSQL)) {
+			sentencia.setInt(1, idPedido);
+			sentencia.setDouble(2, total);
+			sentencia.setString(3, dniCliente);
+			sentencia.setInt(4, idMetodo);
+			sentencia.executeUpdate();
+			return idPedido;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public static void comprarPintura(int id_pedido, int id_dibujos, double precio, Connection conexion) {
+		String sentenciaSQL = "INSERT INTO pedido_dibujos (id_pedido, id_dibujos, precio_compra) VALUES (?, ?, ?)";
+		PreparedStatement sentencia = null;
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSQL);
+			sentencia.setInt(1, id_pedido);
+			sentencia.setInt(2, id_dibujos);
+			sentencia.setDouble(3, precio);
+			sentencia.executeUpdate();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			if (sentencia != null) {
+				try {
+					sentencia.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }
