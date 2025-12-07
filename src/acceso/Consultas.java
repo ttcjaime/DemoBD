@@ -1,7 +1,6 @@
 package acceso;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,8 +37,8 @@ public class Consultas {
 		return false;
 	}
 
-	public static boolean usuarioExiste(String dni, Connection conexion) {
-		String sentenciaSql = "SELECT dni FROM usuarios";
+	public static boolean usuarioExiste(String dni, Connection conexion, String email) {
+		String sentenciaSql = "SELECT dni, email FROM usuarios";
 		PreparedStatement sentencia = null;
 
 		try {
@@ -47,7 +46,8 @@ public class Consultas {
 			ResultSet resultado = sentencia.executeQuery();
 			while (resultado.next()) {
 				String dniExistente = resultado.getString(1);
-				if (dniExistente.equals(dni)) {
+				String emailExistente = resultado.getString(2);
+				if (dniExistente.equals(dni) || emailExistente.equals(email)) {
 					return true;
 				}
 			}
@@ -312,6 +312,37 @@ public class Consultas {
 				}
 			}
 		}
+	}
+
+	//este metodo lo ocuparemos para que, cuando se inicie sesión, obtener el rol
+	//del usuario, y asi, si es cliente, no pueda subir una obra
+	public static String asignarRol(String email, Connection conexion) {
+		String sentenciaSql = "SELECT rol FROM usuarios where email = ?";
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSql);
+			sentencia.setString(1, email);
+			resultado = sentencia.executeQuery();
+
+			if (resultado.next()) {
+				return resultado.getString(1);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (resultado != null)
+					resultado.close();
+				if (sentencia != null)
+					sentencia.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 
 }
