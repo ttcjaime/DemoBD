@@ -12,6 +12,7 @@ public class Menu {
 	String rol = "";
 	private Scanner scanner = new Scanner(System.in);
 	boolean inicioSesion = false;
+	String emailUsuario = "";
 
 	public void acceder() throws SQLException {
 		conexion = ConexionBd.conectar();
@@ -71,8 +72,7 @@ public class Menu {
 					}
 					double precioPorId = Consultas.obtenerPrecioDibujo(idDibujo, conexion);
 
-					System.out.print("Introduce de nuevo tu DNI: ");
-					String dni = scanner.nextLine();
+					String dni = Consultas.obtenerDniUsuario(emailUsuario, conexion);
 
 					int idMetodo = 1; // ya que solo es un metodo de pago
 					Consultas.insertarMetodoPago(idMetodo, "Visa 1234", "Visa", "Tarjeta", conexion);
@@ -217,6 +217,7 @@ public class Menu {
 		if (Consultas.puedeIniciarSesion(email, pswd, conexion)) {
 			System.out.println("Se ha iniciado sesión");
 			rol = Consultas.asignarRol(email, conexion);
+			emailUsuario = email;
 			inicioSesion = true;
 		} else {
 			System.out.println("El correo o contraseña no son validos");

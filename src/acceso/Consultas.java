@@ -344,5 +344,36 @@ public class Consultas {
 		}
 		return null;
 	}
+	
+	//metodo para obtener el Dni del usuario que ha iniciado sesion
+	//asi evitamos pedirle el Dni de nuevo
+	public static String obtenerDniUsuario(String email, Connection conexion) {
+		String sentenciaSql = "SELECT dni FROM usuarios where email = ?";
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+
+		try {
+			sentencia = conexion.prepareStatement(sentenciaSql);
+			sentencia.setString(1, email);
+			resultado = sentencia.executeQuery();
+
+			if (resultado.next()) {
+				return resultado.getString(1);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (resultado != null)
+					resultado.close();
+				if (sentencia != null)
+					sentencia.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 
 }
