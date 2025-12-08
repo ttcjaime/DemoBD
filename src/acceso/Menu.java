@@ -17,8 +17,8 @@ public class Menu {
 	public void acceder() throws SQLException {
 		conexion = ConexionBd.conectar();
 		scanner = new Scanner(System.in);
-		
-		//mientras no se inicie sesion, nosotros seguiremos en el mismo menu
+
+		// mientras no se inicie sesion, nosotros seguiremos en el mismo menu
 		while (!inicioSesion) {
 			System.out.print("Bienvenido a Inkly \n" + "1. Registrarse \n" + "2. Inicio sesión \n" + "Escoge: ");
 			String eleccion = scanner.nextLine();
@@ -42,7 +42,7 @@ public class Menu {
 
 	}
 
-	private void inicio() throws InputMismatchException {
+	private void inicio() throws InputMismatchException, SQLException {
 
 		// añadido el do while y lo cambie a int ya que asi el bucle do while no da
 		// problemas
@@ -75,7 +75,11 @@ public class Menu {
 					String dni = Consultas.obtenerDniUsuario(emailUsuario, conexion);
 
 					int idMetodo = 1; // ya que solo es un metodo de pago
-					Consultas.insertarMetodoPago(idMetodo, "Visa 1234", "Visa", "Tarjeta", conexion);
+					if (!Consultas.existeMetodoPago(conexion)) {
+						Consultas.insertarMetodoPago(idMetodo, "Visa 1234", "Visa", "Tarjeta", conexion);
+					} else {
+						System.out.println("Ya existe un método de pago, no se inserta de nuevo.");
+					}
 
 					int idPedido = Consultas.crearPedido(conexion, dni, precioPorId, idMetodo);
 					if (idPedido == -1) {
@@ -132,7 +136,7 @@ public class Menu {
 		boolean formatoCorrecto = true;
 		int edad = 0;
 		String telefono = "";
-		
+
 		System.out.print("Introduce tu nombre: ");
 		String nombre = scanner.nextLine();
 
@@ -163,7 +167,7 @@ public class Menu {
 				System.err.println("Introduce un número de telefono correcto");
 			}
 		}
-		
+
 		System.out.print("Introduce tu DNI: ");
 		String dni = scanner.nextLine();
 
@@ -202,7 +206,7 @@ public class Menu {
 				Consultas.insertarCliente(direccion, dni, conexion);
 				System.out.println("_________________________________________");
 			}
-			
+
 		}
 
 	}

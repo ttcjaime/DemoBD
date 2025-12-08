@@ -65,7 +65,6 @@ public class Consultas {
 		return false;
 	}
 
-	// añadi rol
 	public static void insertarUsuario(String nombre, int edad, String telefono, String dni, String nacionalidad,
 			String email, String pswd, String rol, Connection conexion) throws SQLException {
 		String sentenciaSQL = "INSERT INTO usuarios (nombre, edad, telefono,"
@@ -116,8 +115,6 @@ public class Consultas {
 			}
 		}
 	}
-
-	// añadido por mi
 
 	public static int obtenerIdDibujo(String titulo, Connection conexion) {
 		String sentenciaSql = "SELECT id_dibujos FROM dibujos WHERE titulo = ?";
@@ -177,6 +174,13 @@ public class Consultas {
 		}
 
 		return -1;
+	}
+
+	public static boolean existeMetodoPago(Connection conexion) throws SQLException {
+		String sql = "SELECT 1 FROM MetodoPago WHERE id_metodo = 1";
+		PreparedStatement ps = conexion.prepareStatement(sql);
+		ResultSet rs = ps.executeQuery();
+		return rs.next();
 	}
 
 	public static void insertarMetodoPago(int idMetodo, String detalles, String proveedor, String tipo,
@@ -314,8 +318,8 @@ public class Consultas {
 		}
 	}
 
-	//este metodo lo ocuparemos para que, cuando se inicie sesión, obtener el rol
-	//del usuario, y asi, si es cliente, no pueda subir una obra
+	// este metodo lo ocuparemos para que, cuando se inicie sesión, obtener el rol
+	// del usuario, y asi, si es cliente, no pueda subir una obra
 	public static String asignarRol(String email, Connection conexion) {
 		String sentenciaSql = "SELECT rol FROM usuarios where email = ?";
 		PreparedStatement sentencia = null;
@@ -344,9 +348,9 @@ public class Consultas {
 		}
 		return null;
 	}
-	
-	//metodo para obtener el Dni del usuario que ha iniciado sesion
-	//asi evitamos pedirle el Dni de nuevo
+
+	// metodo para obtener el Dni del usuario que ha iniciado sesion
+	// asi evitamos pedirle el Dni de nuevo
 	public static String obtenerDniUsuario(String email, Connection conexion) {
 		String sentenciaSql = "SELECT dni FROM usuarios where email = ?";
 		PreparedStatement sentencia = null;
