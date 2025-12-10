@@ -74,9 +74,7 @@ public class Menu {
 					try {
 						if (!ConsultasMetodoPago.existeMetodoPago(conexion)) {
 							ConsultasMetodoPago.insertarMetodoPago(idMetodo, "Visa 1234", "Visa", "Tarjeta", conexion);
-						} else {
-							System.out.println("Ya existe un método de pago, no se inserta de nuevo.");
-						}
+						} 
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
