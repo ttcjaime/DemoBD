@@ -2,7 +2,7 @@ package principal;
 
 import java.sql.SQLException;
 
-import acceso.Menu;
+import ui.Menu;
 
 public class Main {
 
@@ -10,7 +10,7 @@ public class Main {
 		
 		Menu menu = new Menu();
 		try {
-			menu.acceder();
+			menu.menuAcceder();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

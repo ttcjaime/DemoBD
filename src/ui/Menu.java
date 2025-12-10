@@ -1,4 +1,4 @@
-package acceso;
+package ui;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,127 +6,102 @@ import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import acceso.ConexionBd;
+import consultas.ConsultasArtista;
+import consultas.ConsultasCliente;
+import consultas.ConsultasMetodoPago;
+import consultas.ConsultasPedido;
+import consultas.ConsultasPinturas;
+import consultas.ConsultasUsuario;
+
 public class Menu {
 
 	private Connection conexion;
-	String rol = "";
+	private String rol;
 	private Scanner scanner = new Scanner(System.in);
 	boolean inicioSesion = false;
-	String emailUsuario = "";
+	private String emailUsuario;
 
-	public void acceder() throws SQLException {
+	public void menuAcceder() throws SQLException {
 		conexion = ConexionBd.conectar();
 		scanner = new Scanner(System.in);
-
-		// mientras no se inicie sesion, nosotros seguiremos en el mismo menu
+		
 		while (!inicioSesion) {
 			System.out.print("Bienvenido a Inkly \n" + "1. Registrarse \n" + "2. Inicio sesión \n" + "Escoge: ");
 			String eleccion = scanner.nextLine();
 			switch (eleccion) {
 			case "1":
-				// modificado por mi
 				definirRoles();
-				// registroUsuario();
 				break;
 			case "2":
 				inicioSesion();
 				break;
 			default:
-				System.err.println("Escoge una opción correcta");
+				System.out.println("Escoge una opción correcta");
 				break;
-
 			}
 		}
-
-		inicio();
-
+		menuInicio();
 	}
 
-	private void inicio() throws InputMismatchException, SQLException {
-
-		// añadido el do while y lo cambie a int ya que asi el bucle do while no da
-		// problemas
-		// he quitado lo de configuraciones
+	private void menuInicio() throws SQLException {
 		int opcion = 0;
 		do {
 			try {
-				System.out.print("Bienvenido a Inkly \n" + "1.Ver carrito de compras \n" + "2.Ver pinturas \n"
-						+ "3.Comprar dibujo \n" + "4.Subir dibujo \n" + "5.Salir \n" + "Elige: ");
+				System.out.print("Bienvenido a Inkly \n" + "1.Ver pinturas \n"
+						+ "2.Comprar dibujo \n" + "3.Subir dibujo \n" + "4.Salir \n" + "Elige: ");
 				opcion = scanner.nextInt();
 				scanner.nextLine();
 
 				switch (opcion) {
 				case 1:
+					ConsultasPinturas.verPinturas(conexion);
 					break;
 				case 2:
-					Consultas.verPinturas(conexion);
-					break;
-				case 3:
 					System.out.print("Introduce el nombre de la obra que desea comprar: ");
 					String dibujo = scanner.nextLine();
-
-					int idDibujo = (int) Consultas.obtenerIdDibujo(dibujo, conexion);
+					
+					int idDibujo = (int) ConsultasPinturas.obtenerIdDibujo(dibujo, conexion);
 					if (idDibujo == -1) {
 						System.out.println("No se encontró la obra.");
 						break;
 					}
-					double precioPorId = Consultas.obtenerPrecioDibujo(idDibujo, conexion);
+					double precioPorId = ConsultasPinturas.obtenerPrecioDibujo(idDibujo, conexion);
 
-					String dni = Consultas.obtenerDniUsuario(emailUsuario, conexion);
+					String dni = ConsultasUsuario.obtenerDniUsuario(emailUsuario, conexion);
 
 					int idMetodo = 1; // ya que solo es un metodo de pago
-					if (!Consultas.existeMetodoPago(conexion)) {
-						Consultas.insertarMetodoPago(idMetodo, "Visa 1234", "Visa", "Tarjeta", conexion);
-					} else {
-						System.out.println("Ya existe un método de pago, no se inserta de nuevo.");
+					try {
+						if (!ConsultasMetodoPago.existeMetodoPago(conexion)) {
+							ConsultasMetodoPago.insertarMetodoPago(idMetodo, "Visa 1234", "Visa", "Tarjeta", conexion);
+						} else {
+							System.out.println("Ya existe un método de pago, no se inserta de nuevo.");
+						}
+					} catch (SQLException e) {
+						e.printStackTrace();
 					}
 
-					int idPedido = Consultas.crearPedido(conexion, dni, precioPorId, idMetodo);
-					if (idPedido == -1) {
-						System.out.println("Error al crear el pedido.");
-						break;
-					}
-
-					Consultas.comprarPintura(idPedido, idDibujo, precioPorId, conexion);
+					int idPedido = ConsultasPedido.crearPedido(conexion, dni, precioPorId, idMetodo);
+					
+					ConsultasPinturas.comprarPintura(idPedido, idDibujo, precioPorId, conexion);
+					
 					System.out.println("Compra realizada correctamente. ID de pedido: " + idPedido);
 					break;
-				case 4:
-					if (rol.equals("artista")) {
-						System.out.print("Introduce el titulo de tu obra: ");
-						String titulo = scanner.nextLine();
-
-						System.out.print("Introduce una descripción: ");
-						String descripcion = scanner.nextLine();
-
-						System.out.print("Introduce el estilo de tu obra: ");
-						String estilo = scanner.nextLine();
-
-						System.out.print("Introduce el precio: ");
-						double precio = scanner.nextDouble();
-						scanner.nextLine();
-
-						LocalDate fecha = LocalDate.now();
-
-						int id = (int) (Math.random() * 100) + 1;
-
-						Consultas.subirPintura(titulo, descripcion, estilo, precio, id, fecha, conexion);
-
-					} else {
-						System.err.println("Debes ser un artista para subir un dibujo.");
-					}
+				case 3:
+					subirPintura();	
 					break;
-				case 5:
+				case 4:
 					System.out.println("Saliendo de Inkly...");
 					break;
 				default:
-					System.err.println("Introduce una opción corretcta.");
+					System.out.println("Introduce una opción corretcta.");
 					break;
 				}
 			} catch (InputMismatchException ime) {
-				System.err.println("Introduce un caracter valido.");
+				System.out.println("Introduce un caracter valido.");
 				scanner.nextLine();
 			}
-		} while (opcion != 5);
+		} while (opcion != 4);
 
 	}
 
@@ -145,14 +120,14 @@ public class Menu {
 				System.out.print("Introduce tu edad: ");
 				edad = scanner.nextInt();
 				scanner.nextLine();
-				// no pueden haber menores de edad
 				if (edad < 100 && edad >= 18) {
 					edadCorrecta = true;
+					formatoCorrecto = true;
 				} else {
-					System.err.println("La edad tiene que ser menor a 100 años");
+					System.out.println("La edad tiene que ser menor a 100 años");
 				}
 			} catch (InputMismatchException ime) {
-				System.err.println("Introduce una edad correcta");
+				System.out.println("Introduce una edad correcta");
 				formatoCorrecto = false;
 				scanner.nextLine();
 			}
@@ -164,7 +139,7 @@ public class Menu {
 			if (telefono.length() == 9 && telefono.matches("^\\d+$")) {
 				numeroCorrecto = true;
 			} else {
-				System.err.println("Introduce un número de telefono correcto");
+				System.out.println("Introduce un número de telefono correcto");
 			}
 		}
 
@@ -180,10 +155,10 @@ public class Menu {
 		System.out.print("Introduce tu contraseña: ");
 		String pswd = scanner.nextLine();
 
-		if (Consultas.usuarioExiste(dni, conexion, email)) {
+		if (ConsultasUsuario.usuarioExiste(dni, conexion, email)) {
 			System.out.println("Ya existe un usuario con ese Email o DNI");
 		} else {
-			Consultas.insertarUsuario(nombre, edad, telefono, dni, nacionalidad, email, pswd, rol, conexion);
+			ConsultasUsuario.insertarUsuario(nombre, edad, telefono, dni, nacionalidad, email, pswd, rol, conexion);
 			System.out.println("Usuario introducido correctamente");
 			// añadi esto
 			if (rol.equals("artista")) {
@@ -193,17 +168,17 @@ public class Menu {
 				String biografia = scanner.nextLine();
 				System.out.print("¿Cual es tu estilo artistico?: ");
 				String estilo = scanner.nextLine();
-
+					
 				int seguidores = (int) (Math.random() * 100) + 1;
 				boolean verificado = true;
-				Consultas.insertarArtista(dni, biografia, estilo, verificado, seguidores, conexion);
+				ConsultasArtista.insertarArtista(dni, biografia, estilo, verificado, seguidores, conexion);
 				System.out.println("_________________________________________");
 			} else {
 				System.out.println("_________________________________________");
 				System.out.println("Terminemos configurando unos detalles...");
 				System.out.print("Introduce tu dirección: ");
 				String direccion = scanner.nextLine();
-				Consultas.insertarCliente(direccion, dni, conexion);
+				ConsultasCliente.insertarCliente(direccion, dni, conexion);
 				System.out.println("_________________________________________");
 			}
 
@@ -218,9 +193,9 @@ public class Menu {
 		System.out.print("Introduce tu contraseña: ");
 		String pswd = scanner.nextLine();
 
-		if (Consultas.puedeIniciarSesion(email, pswd, conexion)) {
+		if (ConsultasUsuario.puedeIniciarSesion(email, pswd, conexion)) {
 			System.out.println("Se ha iniciado sesión");
-			rol = Consultas.asignarRol(email, conexion);
+			rol = ConsultasUsuario.asignarRol(email, conexion);
 			emailUsuario = email;
 			inicioSesion = true;
 		} else {
@@ -229,7 +204,6 @@ public class Menu {
 
 	}
 
-	// añadido por mi
 	private void definirRoles() throws SQLException {
 		System.out.print("¿Vas a ser artista o cliente? \n" + "1.Artista \n" + "2.Cliente \n" + "Elige: ");
 		String opcion = scanner.nextLine();
@@ -242,6 +216,30 @@ public class Menu {
 			rol = "cliente";
 			registroUsuario();
 			break;
+		}
+	}
+
+	private void subirPintura() {
+		if (rol.equals("artista")) {
+			System.out.print("Introduce el titulo de tu obra: ");
+			String titulo = scanner.nextLine();
+
+			System.out.print("Introduce una descripción: ");
+			String descripcion = scanner.nextLine();
+
+			System.out.print("Introduce el estilo de tu obra: ");
+			String estilo = scanner.nextLine();
+
+			System.out.print("Introduce el precio: ");
+			double precio = scanner.nextDouble();
+			scanner.nextLine();
+
+			LocalDate fecha = LocalDate.now();
+
+			ConsultasPinturas.subirPintura(titulo, descripcion, estilo, precio, fecha, conexion);
+
+		} else {
+			System.out.println("Debes ser un artista para subir un dibujo.");
 		}
 	}
 
